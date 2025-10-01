@@ -84,6 +84,46 @@ class Biblioteca:
         4. Si se cumplen, crear un objeto Prestamo y añadirlo a la lista.
         Pista: usuario.agregar_prestamo(nuevo_prestamo)
         """
+        usuario = None
+        for u in self.__usuarios:
+            if u.get_id() == id_usuario:
+                usuario = u
+                break
+        if not usuario:
+            print("Usuario no encontrado.")
+            return
+            
+        libro = None
+        for l in self.__libros:
+            if l.get_codigo() == codigo_libro:
+                libro = l
+                break
+        if not libro:
+            print("Libro no encontrado.")
+            return
+
+# Verificar disponibilidad del libro
+        
+        if libro.get_disponibles() <= 0:
+            print("No hay copias disponibles del libro.")
+            return
+            
+ #Verificar cantidad de préstamos del usuario
+        
+        if len(usuario.get_prestamos()) >= 3:
+            print("El usuario ya tiene el máximo de préstamos activos (3).")
+            return
+
+# Realizar préstamo
+            
+        if libro.prestar(): 
+            nuevo_prestamo = Prestamo(usuario, libro, fecha, dias)
+            usuario.agregar_prestamo(nuevo_prestamo)
+            self.__prestamos.append(nuevo_prestamo)
+            print(f"Préstamo realizado: {libro.get_titulo()} para {usuario.get_nombre()} desde {fecha} por {dias} días.")
+        else: 
+            print("No fue posible realizar el préstamo.")
+            
 
     def devolver_libro(self, id_usuario, codigo_libro):
         """
@@ -92,12 +132,63 @@ class Biblioteca:
             - libro.devolver()
             - usuario.devolver_prestamo(prestamo)
             - quitar de self.__prestamos
+
         """
+        # Buscar usuario
+        usuario = None
+        for u in self.__usuarios:
+            if u.get_id() == id_usuario:
+                usuario = u
+                break
+
+        if not usuario:
+            print("Usuario no encontrado.")
+            return
+
+        # Buscar préstamo correspondiente
+        prestamo = None
+        for p in usuario.get_prestamos():
+            if p.get_libro().get_codigo() == codigo_libro:
+                prestamo = p
+                break
+
+        if not prestamo:
+            print("No se encontró un préstamo activo de ese libro para este usuario.")
+            return
+
+        # Procesar devolución
+        libro = prestamo.get_libro()
+        libro.devolver()
+        usuario.devolver_prestamo(prestamo)
+        if prestamo in self.__prestamos:
+            self.__prestamos.remove(prestamo)
+
+        print(f"Libro '{libro.get_titulo()}' devuelto correctamente por {usuario.get_nombre()}.")
 
     def consultar_prestamos_usuario(self, id_usuario):
         """
         Se busca el usuario y se listan los libros que tiene en su lista de préstamos.
         """
+        # Buscar usuario
+        usuario = None
+        for u in self.__usuarios:
+            if u.get_id() == id_usuario:
+                usuario = u
+                break
+
+        if not usuario:
+            print("Usuario no encontrado.")
+            return
+
+        prestamos = usuario.get_prestamos()
+        if not prestamos:
+            print("El usuario no tiene préstamos activos.")
+        else:
+            print(f"Préstamos activos del usuario {usuario.get_nombre()}:")
+            for p in prestamos:
+                libro = p.get_libro()
+                print(f"- {libro.get_titulo()} (Código: {libro.get_codigo()})")
+
 
 
 
