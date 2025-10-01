@@ -8,6 +8,21 @@ class Biblioteca:
         self.__prestamos = []
 
     # Métodos de gestión (aquí SOLO la estructura con explicación):
+    def agregar_libro(self,libro):
+        for i in self.__libros:
+            if i.get_codigo() == libro.get_codigo():
+                print(f"El libro ya existe")
+                return
+        self.__libros.append(libro)
+        print(f"Libro -{libro.get_titulo()}- agregado correctamente.")
+
+    def agregar_usuario(self, usuario):
+        for j in self.__usuarios:
+            if j.get_id() == usuario.get_id():
+                print(f"Este usuario ya existe")
+                return
+        self.__usuarios.append(usuario)
+        print(f"Usuario -{usuario.get_nombre()}- agregado correctamente.") 
 
     def listar_libros(self):
         """
@@ -50,3 +65,4 @@ class Biblioteca:
         """
         Se busca el usuario y se listan los libros que tiene en su lista de préstamos.
         """
+
