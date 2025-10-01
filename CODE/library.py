@@ -26,7 +26,7 @@ class Biblioteca:
                 return
         self.__usuarios.append(usuario)
         print(f"Usuario -{usuario.get_nombre()}- agregado correctamente.") 
-
+#JuanDavidOcampo
     def listar_libros(self):
         """
         Aquí hay que recorrer la lista de libros y mostrar
@@ -35,14 +35,44 @@ class Biblioteca:
             for libro in self.__libros:
                 print(libro.get_titulo(), libro.get_disponibles())
         """
-
-    def consultar_libros(self, criterio, valor):
+        if not self.__libros:
+            print("No hay libros registrados en la biblioteca.")
+            return
+         print("==== Listado de libros disponibles en la biblioteca ====")
+        for libro in self.__libros:
+            libro.mostrar_todo()
+    #JuanDavidOcampo
+    def consultar_libros(self, criterio):
         """
         Aquí la idea es permitir buscar libros ya sea por título o por área.
         Se puede hacer con un if que compare criterio == "titulo" o criterio == "area".
         Luego recorrer la lista y devolver los que coincidan.
         """
+        if not self.__libros:
+        print("No hay libros registrados en la biblioteca.")
+        return
 
+        # Pedimos el texto de búsqueda al usuario
+        texto_busqueda = input(f"Ingrese el {criterio} que desea buscar: ").lower()
+    
+        resultados = []
+    
+        # Recorremos la lista de libros y verificamos coincidencias
+        for libro in self.__libros:
+            if criterio == "titulo" and texto_busqueda in libro.get_titulo().lower():
+                resultados.append(libro)
+            elif criterio == "autor" and texto_busqueda in libro.get_autor().lower():
+                resultados.append(libro)
+            elif criterio == "area" and texto_busqueda in libro.get_area().lower():
+                resultados.append(libro)
+    
+        # Mostramos resultados
+        if resultados:
+            print(f"Se encontraron {len(resultados)} libros:")
+            for l in resultados:
+                l.mostrar_todo()
+        else:
+            print("No se encontraron libros con ese criterio.")
     def realizar_prestamo(self, id_usuario, codigo_libro, fecha, dias):
         """
         Aquí debes:
@@ -68,5 +98,6 @@ class Biblioteca:
         """
         Se busca el usuario y se listan los libros que tiene en su lista de préstamos.
         """
+
 
 
