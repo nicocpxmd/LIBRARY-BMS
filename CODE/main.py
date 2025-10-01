@@ -1,3 +1,7 @@
+from book import Libro
+from loan import Prestamo
+from user import Usuario
+from library import Biblioteca
 # ================================
 # Programa Principal
 # ================================
@@ -19,3 +23,4 @@ if __name__ == "__main__":
     6. Salir
     """
     # En cada opción llamas a los métodos de la clase Biblioteca.
+
