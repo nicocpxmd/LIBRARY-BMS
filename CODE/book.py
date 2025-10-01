@@ -37,3 +37,13 @@ class Libro:
     def devolver(self):
         if self.__disponibles < self.__unidades:
             self.__disponibles += 1
+
+    def mostrar_todo(self):
+        print(f"Código: {self.__codigo}")
+        print(f"Título: {self.__titulo}")
+        print(f"Autor: {self.__autor}")
+        print(f"Año de publicación: {self.__anio_publicacion}")
+        print(f"Área: {self.__area}")
+        print(f"Unidades totales: {self.__unidades}")
+        print(f"Disponibles: {self.__disponibles}")
+        print("-" * 30)
