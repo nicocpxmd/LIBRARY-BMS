@@ -1,8 +1,13 @@
+#Juan David Ocampo Gutierrez
+# Nicolás Castro Pacheco
+# Michell Valencia Berdugo
+# Juan David Rivera Durán
+
 # ================================
 # Clase Prestamo
 # ================================
-
 from datetime import timedelta
+
 class Prestamo:
     def __init__(self, usuario, libro, fecha_prestamo, dias_prestamo):
         self.__usuario = usuario

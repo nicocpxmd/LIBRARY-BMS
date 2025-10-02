@@ -1,151 +1,145 @@
+from datetime import datetime, date
 from book import Libro
 from user import Usuario
 from loan import Prestamo
-# ================================
-# Clase Biblioteca
-# ================================
+
 class Biblioteca:
     def __init__(self):
         self.__libros = []
         self.__usuarios = []
         self.__prestamos = []
 
-    # Métodos de gestión (aquí SOLO la estructura con explicación):
-    def agregar_libro(self,libro):
-        for i in self.__libros:
-            if i.get_codigo() == libro.get_codigo():
-                print(f"El libro ya existe")
-                return
+    # ----- Métodos auxiliares de búsqueda -----
+    def buscar_libro_por_codigo(self, codigo):
+        for libro in self.__libros:
+            if libro.get_codigo() == codigo:
+                return libro
+        return None
+
+    def buscar_usuario_por_id(self, identificador):
+        for usuario in self.__usuarios:
+            if usuario.get_id() == identificador:
+                return usuario
+        return None
+
+    # ----- Agregar -----
+    def agregar_libro(self, libro: Libro):
+        if self.buscar_libro_por_codigo(libro.get_codigo()):
+            print("El libro ya existe")
+            return
         self.__libros.append(libro)
         print(f"Libro -{libro.get_titulo()}- agregado correctamente.")
 
-    def agregar_usuario(self, usuario):
-        for j in self.__usuarios:
-            if j.get_id() == usuario.get_id():
-                print(f"Este usuario ya existe")
-                return
+    def agregar_usuario(self, usuario: Usuario):
+        if self.buscar_usuario_por_id(usuario.get_id()):
+            print("Este usuario ya existe")
+            return
         self.__usuarios.append(usuario)
-        print(f"Usuario -{usuario.get_nombre()}- agregado correctamente.") 
+        print(f"Usuario -{usuario.get_nombre()}- agregado correctamente.")
+
+
 #JuanDavidOcampo
+    # ----- Listar -----
     def listar_libros(self):
+        if not self.__libros:
+            print("No hay libros registrados en la biblioteca.")
+            return
+        print("==== Listado de libros disponibles en la biblioteca ====")
+        for libro in self.__libros:
+            libro.mostrar_todo()
+
+
+#JuanDavidOcampo
+    # ----- Consultar (ahora recibe criterio y valor) -----
+    def consultar_libros(self, criterio: str, valor: str): #Cambie el input por darle los dos parametros (criterio y valor) para en caso que requiera reutilizar se pueda hacer y no se corte con el input - Nico
         """
-        Aquí hay que recorrer la lista de libros y mostrar
-        cuáles están disponibles.
-        Ejemplo de pista:
-            for libro in self.__libros:
-                print(libro.get_titulo(), libro.get_disponibles())
+        criterio: 'titulo' | 'autor' | 'area'
+        valor: texto a buscar (subcadena, case-insensitive)
         """
         if not self.__libros:
             print("No hay libros registrados en la biblioteca.")
             return
-         print("==== Listado de libros disponibles en la biblioteca ====")
-        for libro in self.__libros:
-            libro.mostrar_todo()
-    #JuanDavidOcampo
-    def consultar_libros(self, criterio):
-        """
-        Aquí la idea es permitir buscar libros ya sea por título o por área.
-        Se puede hacer con un if que compare criterio == "titulo" o criterio == "area".
-        Luego recorrer la lista y devolver los que coincidan.
-        """
-        if not self.__libros:
-        print("No hay libros registrados en la biblioteca.")
-        return
 
-        # Pedimos el texto de búsqueda al usuario
-        texto_busqueda = input(f"Ingrese el {criterio} que desea buscar: ").lower()
-    
+        criterio = criterio.lower()
+        valor = valor.lower().strip()
         resultados = []
-    
-        # Recorremos la lista de libros y verificamos coincidencias
+
         for libro in self.__libros:
-            if criterio == "titulo" and texto_busqueda in libro.get_titulo().lower():
+            if criterio == "titulo" and valor in libro.get_titulo().lower():
                 resultados.append(libro)
-            elif criterio == "autor" and texto_busqueda in libro.get_autor().lower():
+            elif criterio == "autor" and valor in libro.get_autor().lower():
                 resultados.append(libro)
-            elif criterio == "area" and texto_busqueda in libro.get_area().lower():
+            elif criterio == "area" and valor in libro.get_area().lower():
                 resultados.append(libro)
-    
-        # Mostramos resultados
+
         if resultados:
-            print(f"Se encontraron {len(resultados)} libros:")
+            print(f"Se encontraron {len(resultados)} libro(s):")
             for l in resultados:
                 l.mostrar_todo()
         else:
             print("No se encontraron libros con ese criterio.")
-    def realizar_prestamo(self, id_usuario, codigo_libro, fecha, dias):
+
+    # ----- Realizar préstamo -----
+    def realizar_prestamo(self, id_usuario: str, codigo_libro: str, fecha_str: str, dias: int):
         """
-        Aquí debes:
-        1. Buscar al usuario en la lista de usuarios.
-        2. Buscar el libro en la lista de libros.
-        3. Verificar que:
-            - El usuario tenga menos de 3 préstamos.
-            - El libro tenga unidades disponibles.
-        4. Si se cumplen, crear un objeto Prestamo y añadirlo a la lista.
-        Pista: usuario.agregar_prestamo(nuevo_prestamo)
+        fecha_str: 'YYYY-MM-DD' (string). dias: int
         """
-        usuario = None
-        for u in self.__usuarios:
-            if u.get_id() == id_usuario:
-                usuario = u
-                break
+        usuario = self.buscar_usuario_por_id(id_usuario)
         if not usuario:
             print("Usuario no encontrado.")
             return
-            
-        libro = None
-        for l in self.__libros:
-            if l.get_codigo() == codigo_libro:
-                libro = l
-                break
+
+        libro = self.buscar_libro_por_codigo(codigo_libro)
         if not libro:
             print("Libro no encontrado.")
             return
 
-# Verificar disponibilidad del libro
-        
+        # Validaciones de negocio
         if libro.get_disponibles() <= 0:
             print("No hay copias disponibles del libro.")
             return
-            
- #Verificar cantidad de préstamos del usuario
-        
+
         if len(usuario.get_prestamos()) >= 3:
             print("El usuario ya tiene el máximo de préstamos activos (3).")
             return
 
-# Realizar préstamo
-            
-        if libro.prestar(): 
-            nuevo_prestamo = Prestamo(usuario, libro, fecha, dias)
+        # Validar y parsear fecha
+        try:
+            fecha_obj = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+        except ValueError:
+            print("Formato de fecha inválido. Use YYYY-MM-DD.")
+            return
+
+        # Validar días
+        if not isinstance(dias, int) or dias <= 0: #Isistance verifica que sea un entero - Nico
+            print("La cantidad de días debe ser un entero positivo.")
+            return
+
+        # Crear préstamo (no tocar el libro hasta confirmar que el préstamo fue creado sin excepción)
+        try:
+            nuevo_prestamo = Prestamo(usuario, libro, fecha_obj, dias)
+        except Exception as e:
+            print(f"Error al crear el préstamo: {e}")
+            return
+
+        # Intentar actualizar stock del libro (prestar)
+        if libro.prestar():
+            # Registrar préstamo
             usuario.agregar_prestamo(nuevo_prestamo)
             self.__prestamos.append(nuevo_prestamo)
-            print(f"Préstamo realizado: {libro.get_titulo()} para {usuario.get_nombre()} desde {fecha} por {dias} días.")
-        else: 
-            print("No fue posible realizar el préstamo.")
-            
+            print(f"Préstamo realizado: '{libro.get_titulo()}' para {usuario.get_nombre()} desde {fecha_str} por {dias} días.")
+        else:
+            # Aunque ya validamos disponibilidad, chequeo por seguridad
+            print("No fue posible realizar el préstamo: no hay unidades disponibles.")
 
-    def devolver_libro(self, id_usuario, codigo_libro):
-        """
-        Aquí se busca el usuario y el préstamo correspondiente.
-        Si existe, se devuelve el libro:
-            - libro.devolver()
-            - usuario.devolver_prestamo(prestamo)
-            - quitar de self.__prestamos
-
-        """
-        # Buscar usuario
-        usuario = None
-        for u in self.__usuarios:
-            if u.get_id() == id_usuario:
-                usuario = u
-                break
-
+    # ----- Devolver libro -----
+    def devolver_libro(self, id_usuario: str, codigo_libro: str):
+        usuario = self.buscar_usuario_por_id(id_usuario)
         if not usuario:
             print("Usuario no encontrado.")
             return
 
-        # Buscar préstamo correspondiente
+        # Buscar préstamo activo del usuario para ese libro
         prestamo = None
         for p in usuario.get_prestamos():
             if p.get_libro().get_codigo() == codigo_libro:
@@ -156,26 +150,27 @@ class Biblioteca:
             print("No se encontró un préstamo activo de ese libro para este usuario.")
             return
 
-        # Procesar devolución
         libro = prestamo.get_libro()
-        libro.devolver()
-        usuario.devolver_prestamo(prestamo)
-        if prestamo in self.__prestamos:
-            self.__prestamos.remove(prestamo)
+        fecha_devolucion = prestamo.get_fecha_devolucion()
+        hoy = date.today()
+        if hoy > fecha_devolucion:
+            dias_retraso = (hoy - fecha_devolucion).days
+            print(f"Atención: la devolución está fuera de plazo por {dias_retraso} día(s).")
+            # Aquí podrías calcular multa si tu política lo requiere.
 
-        print(f"Libro '{libro.get_titulo()}' devuelto correctamente por {usuario.get_nombre()}.")
+        # Actualizar stock y registros
+        if libro.devolver():
+            usuario.devolver_prestamo(prestamo)
+            if prestamo in self.__prestamos:
+                self.__prestamos.remove(prestamo)
+            print(f"Libro '{libro.get_titulo()}' devuelto correctamente por {usuario.get_nombre()}.")
+        else:
+            # Caso no esperado: intentar devolver más de las unidades totales
+            print("Error al devolver: las unidades en biblioteca ya están al máximo.")
 
-    def consultar_prestamos_usuario(self, id_usuario):
-        """
-        Se busca el usuario y se listan los libros que tiene en su lista de préstamos.
-        """
-        # Buscar usuario
-        usuario = None
-        for u in self.__usuarios:
-            if u.get_id() == id_usuario:
-                usuario = u
-                break
-
+    # ----- Consultar préstamos por usuario -----
+    def consultar_prestamos_usuario(self, id_usuario: str):
+        usuario = self.buscar_usuario_por_id(id_usuario)
         if not usuario:
             print("Usuario no encontrado.")
             return
@@ -183,12 +178,10 @@ class Biblioteca:
         prestamos = usuario.get_prestamos()
         if not prestamos:
             print("El usuario no tiene préstamos activos.")
-        else:
-            print(f"Préstamos activos del usuario {usuario.get_nombre()}:")
-            for p in prestamos:
-                libro = p.get_libro()
-                print(f"- {libro.get_titulo()} (Código: {libro.get_codigo()})")
+            return
 
-
-
-
+        print(f"Préstamos activos del usuario {usuario.get_nombre()}:")
+        for p in prestamos:
+            libro = p.get_libro()
+            fecha_dev = p.get_fecha_devolucion()
+            print(f"- {libro.get_titulo()} (Código: {libro.get_codigo()}) - Devolver antes de: {fecha_dev}")
