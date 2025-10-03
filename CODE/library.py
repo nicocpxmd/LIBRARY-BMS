@@ -151,8 +151,10 @@ class Biblioteca:
             return
 
         libro = prestamo.get_libro()
-        fecha_devolucion = prestamo.get_fecha_devolucion()
+        fecha_devolucion_str = prestamo.get_fecha_devolucion()  # Es string
+        fecha_devolucion = datetime.strptime(fecha_devolucion_str, "%Y-%m-%d").date()  # Convertir a date
         hoy = date.today()
+        
         if hoy > fecha_devolucion:
             dias_retraso = (hoy - fecha_devolucion).days
             print(f"Atención: la devolución está fuera de plazo por {dias_retraso} día(s).")
